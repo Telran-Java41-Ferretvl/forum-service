@@ -1,6 +1,7 @@
 package telran.java41.forum.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import telran.java41.forum.dto.NewCommentDto;
 import telran.java41.forum.dto.NewPostDto;
 import telran.java41.forum.dto.PostDto;
 import telran.java41.forum.dto.exceptions.PostNotFoundException;
+import telran.java41.model.Comment;
 import telran.java41.model.Post;
 
 @Service
@@ -49,8 +51,19 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public PostDto updatePost(NewPostDto postUpdateDto, String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		if (postUpdateDto.getContent() != null) {
+			post.setContent(postUpdateDto.getContent());
+		}
+		if (postUpdateDto.getTitle() != null) {
+			post.setTitle(postUpdateDto.getTitle());
+		}
+		if (postUpdateDto.getTags() != null) {
+			post.getTags().retainAll(postUpdateDto.getTags());
+			post.getTags().addAll(postUpdateDto.getTags());
+		}		
+		postRepository.save(post);
+		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
@@ -62,26 +75,30 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public PostDto addComment(String id, String author, NewCommentDto newCommentDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = postRepository.findById(id).orElseThrow(() -> new PostNotFoundException(id));
+		post.addComment(new Comment(author, newCommentDto.getMessage()));
+		postRepository.save(post);
+		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByAuthor(String author) {
-		// TODO Auto-generated method stub
-		return null;
+		return postRepository.findByAuthorIgnoreCase(author)
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByTags(List<String> tags) {
-		// TODO Auto-generated method stub
-		return null;
+		return postRepository.findByTagsInIgnoreCase(tags)
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByDates(DatePeriodDto datePeriodDto) {
-		// TODO Auto-generated method stub
-		return null;
+		return postRepository.findBydateCreatedBetween(datePeriodDto.getDateFrom(), datePeriodDto.getDateTo())
+				.map(p -> modelMapper.map(p, PostDto.class))
+				.collect(Collectors.toList());
 	}
-
 }
