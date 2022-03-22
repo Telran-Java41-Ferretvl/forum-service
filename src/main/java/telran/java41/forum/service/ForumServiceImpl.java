@@ -59,7 +59,6 @@ public class ForumServiceImpl implements ForumService {
 			post.setTitle(postUpdateDto.getTitle());
 		}
 		if (postUpdateDto.getTags() != null) {
-			post.getTags().retainAll(postUpdateDto.getTags());
 			post.getTags().addAll(postUpdateDto.getTags());
 		}		
 		postRepository.save(post);
