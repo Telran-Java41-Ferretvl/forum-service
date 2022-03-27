@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
+import telran.java41.configuration.UserRoles;
 
 @SpringBootApplication
 public class ForumServiceApplication implements CommandLineRunner {
@@ -24,8 +25,8 @@ public class ForumServiceApplication implements CommandLineRunner {
 		if (!repository.existsById("admin")) {
 			String password = BCrypt.hashpw("admin", BCrypt.gensalt());
 			UserAccount userAccount = new UserAccount("admin", password, "", "");
-			userAccount.addRole("MODERATOR");
 			userAccount.addRole("ADMINISTRATOR");
+			userAccount.addRole("MODERATOR");
 			repository.save(userAccount);
 		}
 	}

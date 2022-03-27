@@ -1,7 +1,6 @@
 package telran.java41.accounting.controller;
 
 import java.security.Principal;
-import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,7 +33,6 @@ public class UserAccountController {
 	public UserAccountResponseDto register(@RequestBody UserRegisterDto userRegisterDto) {
 		return accountService.addUser(userRegisterDto);
 	}
-	
 	
 	@PostMapping("/login")
 	public UserAccountResponseDto login(Principal principal) {

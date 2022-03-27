@@ -11,12 +11,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
+import telran.java41.configuration.UserRoles;
 
 @Service
+@Order(20)
 public class AdminFilter implements Filter {
 
 	UserAccountRepository repository;
@@ -35,14 +38,13 @@ public class AdminFilter implements Filter {
 
 		if (checkEndpoint(request.getMethod(), request.getServletPath())) {
 			UserAccount userAccount = repository.findById(request.getUserPrincipal().getName()).get();
-			if (!userAccount.getRoles().contains("Administrator".toUpperCase())) {
+			if (!userAccount.getRoles().contains(UserRoles.ADMINISTRATOR)) {
 				response.sendError(403);
 				return;
 			}
 		}
 
 		chain.doFilter(request, response);
-
 	}
 
 	private boolean checkEndpoint(String method, String path) {

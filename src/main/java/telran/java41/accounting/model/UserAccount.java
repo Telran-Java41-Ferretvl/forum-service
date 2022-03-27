@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import telran.java41.accounting.dto.exceptions.RoleNotFoundException;
+import telran.java41.configuration.UserRoles;
 
 @Getter
 @EqualsAndHashCode(of = "login")
@@ -22,11 +24,11 @@ public class UserAccount {
 	String firstName;
 	@Setter
 	String lastName;
-	Set<String> roles;
-	
+	Set<UserRoles> roles;
+
 	public UserAccount() {
 		roles = new HashSet<>();
-		roles.add("USER");
+		roles.add(UserRoles.USER);
 	}
 
 	public UserAccount(String login, String password, String firstName, String lastName) {
@@ -36,13 +38,23 @@ public class UserAccount {
 		this.firstName = firstName;
 		this.lastName = lastName;
 	}
-	
-	public boolean addRole(String role) {
-		return roles.add(role);
+
+	public boolean addRole(String role) throws RoleNotFoundException  {
+		for (UserRoles userRoles : UserRoles.values()) {
+			if (userRoles.name().equalsIgnoreCase(role)) {
+				return roles.add(userRoles);
+			}
+		}
+		throw new RoleNotFoundException(role);
 	}
-	
-	public boolean removeRole(String role) {
-		return roles.remove(role);
+
+	public boolean removeRole(String role) throws RoleNotFoundException {
+		for (UserRoles userRoles : UserRoles.values()) {
+			if (userRoles.name().equalsIgnoreCase(role)) {
+				return roles.remove(userRoles);
+			}
+		}
+		throw new RoleNotFoundException(role);
 	}
-	
+
 }
