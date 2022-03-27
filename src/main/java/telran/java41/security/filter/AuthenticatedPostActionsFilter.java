@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import telran.java41.accounting.dao.UserAccountRepository;
@@ -42,7 +43,7 @@ public class AuthenticatedPostActionsFilter implements Filter {
 		if (!(principal==null) && checkEndpoint(request.getMethod(), request.getServletPath())) {
 			UserAccount userAccount = userRepository.findById(principal.getName()).orElse(null);
 			String [] temp = request.getRequestURI().split("/");
-			String login = temp[temp.length-1];
+			String login = temp[temp.length - 1];
 			if (!(userAccount.getLogin().equals(login))) {
 				response.sendError(403);
 				return;
@@ -53,8 +54,10 @@ public class AuthenticatedPostActionsFilter implements Filter {
 	}
 	
 	private boolean checkEndpoint(String method, String path) {
-		return ((path.matches("/forum/post/\\w+/?") && ("POST".equalsIgnoreCase(method)))
-				|| (path.matches("/forum/post/\\w+/comment/\\w+/?") && "PUT".equalsIgnoreCase(method)));
+		return ((path.matches("/forum/post/\\w+/?") 
+				&& (HttpMethod.POST.toString().equalsIgnoreCase(method)))
+				|| (path.matches("/forum/post/\\w+/comment/\\w+/?")
+						&& HttpMethod.PUT.toString().equalsIgnoreCase(method)));
 				 
 	}
 }

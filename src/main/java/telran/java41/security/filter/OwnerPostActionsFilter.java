@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import telran.java41.accounting.dao.UserAccountRepository;
@@ -53,13 +54,15 @@ public class OwnerPostActionsFilter implements Filter {
 			if (currentPost == null) {
 				response.sendError(404, "Post not found");
 				return;
-			}
-			if (request.getMethod().equals("DELETE") && !userAccount.getRoles().contains(UserRoles.MODERATOR)
+			} 
+			if (request.getMethod().equals(HttpMethod.DELETE.toString()) &&
+					!userAccount.getRoles().contains(UserRoles.MODERATOR)
 					&& !(userAccount.getLogin().equals(currentPost.getAuthor()))) {
 				response.sendError(403);
 				return;
 			}
-			if (request.getMethod().equals("PUT") && !(userAccount.getLogin().equals(currentPost.getAuthor()))) {
+			if (request.getMethod().equals(HttpMethod.PUT.toString()) && 
+					!(userAccount.getLogin().equals(currentPost.getAuthor()))) {
 				response.sendError(403);
 				return;
 			}
@@ -69,8 +72,9 @@ public class OwnerPostActionsFilter implements Filter {
 	}
 
 	private boolean checkEndpoint(String method, String path) {
-		return (path.matches("/forum/post/\\w+/?")
-				&& ("DELETE".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)));
+		return (path.matches("/forum/post/\\w+/?") &&
+				(HttpMethod.DELETE.toString().equalsIgnoreCase(method) || 
+						HttpMethod.PUT.toString().equalsIgnoreCase(method)));
 
 	}
 }

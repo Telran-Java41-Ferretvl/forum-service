@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import telran.java41.accounting.dao.UserAccountRepository;
@@ -60,7 +61,7 @@ public class AuthenticationFilter implements Filter {
 	}
 
 	private boolean checkEndpoint(String method, String path) {
-		return !(("POST".equalsIgnoreCase(method) && path.matches("/account/register/?")) ||
+		return !((HttpMethod.POST.toString().equalsIgnoreCase(method) && path.matches("/account/register/?")) ||
 				path.matches("/forum/posts(/\\w+)+/?"));
 	}
 
