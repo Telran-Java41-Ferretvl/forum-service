@@ -32,7 +32,7 @@ public class UserAccount {
 	}
 
 	public UserAccount(String login, String password, String firstName, String lastName) {
-		super();
+		this();
 		this.login = login;
 		this.password = password;
 		this.firstName = firstName;
@@ -40,9 +40,9 @@ public class UserAccount {
 	}
 
 	public boolean addRole(String role) throws RoleNotFoundException  {
-		for (UserRoles userRoles : UserRoles.values()) {
-			if (userRoles.name().equalsIgnoreCase(role)) {
-				return roles.add(userRoles);
+		for (UserRoles userRole : UserRoles.values()) {
+			if (userRole.name().equalsIgnoreCase(role)) {
+				return roles.add(userRole);
 			}
 		}
 		throw new RoleNotFoundException(role);

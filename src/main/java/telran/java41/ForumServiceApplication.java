@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
-import telran.java41.configuration.UserRoles;
 
 @SpringBootApplication
 public class ForumServiceApplication implements CommandLineRunner {
