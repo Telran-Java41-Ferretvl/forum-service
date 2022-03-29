@@ -21,16 +21,19 @@ import org.springframework.stereotype.Service;
 
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
+import telran.java41.security.service.SessionService;
 
 @Service
 @Order(10)
 public class AuthenticationFilter implements Filter {
 
 	UserAccountRepository repository;
+	SessionService sessionService;
 
 	@Autowired
-	public AuthenticationFilter(UserAccountRepository repository) {
+	public AuthenticationFilter(UserAccountRepository repository, SessionService sessionService) {
 		this.repository = repository;
+		this.sessionService = sessionService;
 	}
 
 	@Override
@@ -41,18 +44,23 @@ public class AuthenticationFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 
 		if (checkEndpoint(request.getMethod(), request.getServletPath())) {
-			String token = request.getHeader("Authorization");
-			String credentials[];
-			try {
-				credentials = getCredentialsFromToken(token);
-			} catch (Exception e) {
-				response.sendError(401, "Token not valid");
-				return;
-			}
-			UserAccount userAccount = repository.findById(credentials[0]).orElse(null);
-			if (userAccount == null || !BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
-				response.sendError(401, "User or password not valid");
-				return;
+			String sessionID = request.getSession().getId();
+			UserAccount userAccount = sessionService.getUser(sessionID);
+			if (userAccount == null) {
+				String token = request.getHeader("Authorization");
+				String credentials[];
+				try {
+					credentials = getCredentialsFromToken(token);
+				} catch (Exception e) {
+					response.sendError(401, "Token not valid");
+					return;
+				}
+				userAccount = repository.findById(credentials[0]).orElse(null);
+				if (userAccount == null || !BCrypt.checkpw(credentials[1], userAccount.getPassword())) {
+					response.sendError(401, "User or password not valid");
+					return;
+				}
+				sessionService.addUser(sessionID, userAccount);
 			}
 			request = new WrappedRequest(request, userAccount.getLogin());
 		}
