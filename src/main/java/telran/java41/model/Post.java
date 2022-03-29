@@ -33,7 +33,7 @@ public class Post {
 	}
 
 	public Post(String title, String content, String author, Set<String> tags) {
-		super();
+		this();
 		this.title = title;
 		this.content = content;
 		this.author = author;
