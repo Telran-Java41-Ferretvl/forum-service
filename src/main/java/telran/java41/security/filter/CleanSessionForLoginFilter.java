@@ -14,19 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import lombok.AllArgsConstructor;
-import telran.java41.accounting.dao.UserAccountRepository;
-import telran.java41.accounting.model.UserAccount;
-import telran.java41.configuration.UserRoles;
-import telran.java41.security.context.SecurityContext;
-import telran.java41.security.context.User;
+import telran.java41.security.service.SessionService;
 
 @Service
-@Order(20)
-@AllArgsConstructor
-public class AdminFilter implements Filter {
-	
-	SecurityContext context;
+@Order(5)
+public class CleanSessionForLoginFilter implements Filter {
+
+	SessionService sessionService;
+
+	@Autowired
+	public CleanSessionForLoginFilter(SessionService sessionService) {
+		this.sessionService = sessionService;
+	}
+
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -34,20 +34,17 @@ public class AdminFilter implements Filter {
 
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-
+		
 		if (checkEndpoint(request.getMethod(), request.getServletPath())) {
-			User user = context.getUser(request.getUserPrincipal().getName());
-			if (!user.getRoles().contains(UserRoles.ADMINISTRATOR)) {
-				response.sendError(403);
-				return;
-			}
+			String sessionID = request.getSession().getId();
+			sessionService.removeUser(sessionID);
 		}
-
+		
 		chain.doFilter(request, response);
 	}
-
+	
 	private boolean checkEndpoint(String method, String path) {
-		return path.matches("/account/user/\\w+/role/\\w+/?");
+		return path.matches("/account/login/?");
 	}
 
 }
