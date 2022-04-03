@@ -14,27 +14,25 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mindrot.jbcrypt.BCrypt;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import lombok.AllArgsConstructor;
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
+import telran.java41.security.context.SecurityContext;
+import telran.java41.security.context.User;
 import telran.java41.security.service.SessionService;
 
 @Service
 @Order(10)
+@AllArgsConstructor
 public class AuthenticationFilter implements Filter {
 
 	UserAccountRepository repository;
 	SessionService sessionService;
-
-	@Autowired
-	public AuthenticationFilter(UserAccountRepository repository, SessionService sessionService) {
-		this.repository = repository;
-		this.sessionService = sessionService;
-	}
+	SecurityContext context;
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -63,6 +61,12 @@ public class AuthenticationFilter implements Filter {
 				sessionService.addUser(sessionID, userAccount);
 			}
 			request = new WrappedRequest(request, userAccount.getLogin());
+			User user = User.builder()
+							.userName(userAccount.getLogin())
+							.password(userAccount.getPassword())
+							.roles(userAccount.getRoles())
+							.build();
+			context.addUser(user);
 		}
 
 		chain.doFilter(request, response);

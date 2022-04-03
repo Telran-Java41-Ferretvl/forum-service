@@ -14,20 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import lombok.AllArgsConstructor;
 import telran.java41.accounting.dao.UserAccountRepository;
 import telran.java41.accounting.model.UserAccount;
 import telran.java41.configuration.UserRoles;
+import telran.java41.security.context.SecurityContext;
+import telran.java41.security.context.User;
 
 @Service
 @Order(20)
+@AllArgsConstructor
 public class AdminFilter implements Filter {
-
-	UserAccountRepository repository;
-
-	@Autowired
-	public AdminFilter(UserAccountRepository repository) {
-		this.repository = repository;
-	}
+	
+	SecurityContext context;
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -37,8 +36,8 @@ public class AdminFilter implements Filter {
 		HttpServletResponse response = (HttpServletResponse) resp;
 
 		if (checkEndpoint(request.getMethod(), request.getServletPath())) {
-			UserAccount userAccount = repository.findById(request.getUserPrincipal().getName()).get();
-			if (!userAccount.getRoles().contains(UserRoles.ADMINISTRATOR)) {
+			User user = context.getUser(request.getUserPrincipal().getName());
+			if (!user.getRoles().contains(UserRoles.ADMINISTRATOR)) {
 				response.sendError(403);
 				return;
 			}
